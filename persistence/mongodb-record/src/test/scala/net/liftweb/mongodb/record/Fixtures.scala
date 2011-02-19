@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 WorldWide Conferencing, LLC
+ * Copyright 2010-2011 WorldWide Conferencing, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package net.liftweb {
-package mongodb {
-package record {
-package fixtures {
+package net.liftweb
+package mongodb
+package record
+package fixtures
 
 import field._
 
@@ -73,6 +73,9 @@ class FieldTypeTestRecord private () extends MongoRecord[FieldTypeTestRecord] wi
   object mandatoryBooleanField extends BooleanField(this)
   object legacyOptionalBooleanField extends BooleanField(this) { override def optional_? = true }
   object optionalBooleanField extends OptionalBooleanField(this)
+  object altNameBooleanField extends BooleanField(this) with MongoField {
+    override def mongoName = Full("alt_bool_field")
+  }
 
   object mandatoryCountryField extends CountryField(this)
   object legacyOptionalCountryField extends CountryField(this) { override def optional_? = true }
@@ -87,22 +90,42 @@ class FieldTypeTestRecord private () extends MongoRecord[FieldTypeTestRecord] wi
   object mandatoryDecimalField extends DecimalField(this, MathContext.UNLIMITED, 2)
   object legacyOptionalDecimalField extends DecimalField(this, MathContext.UNLIMITED, 2) { override def optional_? = true }
   object optionalDecimalField extends OptionalDecimalField(this, MathContext.UNLIMITED, 2)
+  object altNameDecimalField extends DecimalField(this, MathContext.UNLIMITED, 2) with MongoField {
+    override def mongoName = Full("alt_dec_field")
+  }
 
   object mandatoryDoubleField extends DoubleField(this)
   object legacyOptionalDoubleField extends DoubleField(this) { override def optional_? = true }
   object optionalDoubleField extends OptionalDoubleField(this)
+  object altNameDoubleField extends DoubleField(this) with MongoField {
+    override def mongoName = Full("alt_double_field")
+  }
 
   object mandatoryEmailField extends EmailField(this, 100)
   object legacyOptionalEmailField extends EmailField(this, 100) { override def optional_? = true }
   object optionalEmailField extends OptionalEmailField(this, 100)
 
+
   object mandatoryEnumField extends EnumField(this, MyTestEnum)
   object legacyOptionalEnumField extends EnumField(this, MyTestEnum) { override def optional_? = true }
   object optionalEnumField extends OptionalEnumField(this, MyTestEnum)
+  object altNameEnumField extends EnumField(this, MyTestEnum) with MongoField {
+    override def mongoName = Full("alt_enum_field")
+  }
+
+  object mandatoryEnumNameField extends EnumNameField(this, MyTestEnum)
+  object legacyOptionalEnumNameField extends EnumNameField(this, MyTestEnum) { override def optional_? = true }
+  object optionalEnumNameField extends OptionalEnumNameField(this, MyTestEnum)
+  object altNameEnumNameField extends EnumNameField(this, MyTestEnum) with MongoField {
+    override def mongoName = Full("alt_enum_name_field")
+  }
 
   object mandatoryIntField extends IntField(this)
   object legacyOptionalIntField extends IntField(this) { override def optional_? = true }
   object optionalIntField extends OptionalIntField(this)
+  object altNameIntField extends IntField(this) with MongoField {
+    override def mongoName = Full("alt_int_field")
+  }
 
   object mandatoryLocaleField extends LocaleField(this)
   object legacyOptionalLocaleField extends LocaleField(this) { override def optional_? = true }
@@ -111,6 +134,9 @@ class FieldTypeTestRecord private () extends MongoRecord[FieldTypeTestRecord] wi
   object mandatoryLongField extends LongField(this)
   object legacyOptionalLongField extends LongField(this) { override def optional_? = true }
   object optionalLongField extends OptionalLongField(this)
+  object altNameLongField extends LongField(this) with MongoField {
+    override def mongoName = Full("alt_long_field")
+  }
 
   // FIXME would be nice to have some of these PostalCode fields depend on an OptionalCountryField, but the type sig of
   // PostalCodeField does not yet allow it.
@@ -121,6 +147,9 @@ class FieldTypeTestRecord private () extends MongoRecord[FieldTypeTestRecord] wi
   object mandatoryStringField extends StringField(this, 100)
   object legacyOptionalStringField extends StringField(this, 100) { override def optional_? = true }
   object optionalStringField extends OptionalStringField(this, 100)
+  object altNameStringField extends StringField(this, 100) with MongoField {
+    override def mongoName = Full("alt_string_field")
+  }
 
   object mandatoryTextareaField extends TextareaField(this, 100)
   object legacyOptionalTextareaField extends TextareaField(this, 100) { override def optional_? = true }
@@ -134,16 +163,25 @@ class FieldTypeTestRecord private () extends MongoRecord[FieldTypeTestRecord] wi
     case that:FieldTypeTestRecord =>
       //this.mandatoryBinaryField.value == that.mandatoryBinaryField.value &&
       this.mandatoryBooleanField.value == that.mandatoryBooleanField.value &&
+      this.altNameBooleanField.value == that.altNameBooleanField.value &&
       this.mandatoryCountryField.value == that.mandatoryCountryField.value &&
       this.mandatoryDecimalField.value == that.mandatoryDecimalField.value &&
+      this.altNameDecimalField.value == that.altNameDecimalField.value &&
       this.mandatoryDoubleField.value == that.mandatoryDoubleField.value &&
+      this.altNameDoubleField.value == that.altNameDoubleField.value &&
       this.mandatoryEmailField.value == that.mandatoryEmailField.value &&
       this.mandatoryEnumField.value == that.mandatoryEnumField.value &&
+      this.altNameEnumField.value == that.altNameEnumField.value &&
+      this.mandatoryEnumNameField.value == that.mandatoryEnumNameField.value &&
+      this.altNameEnumNameField.value == that.altNameEnumNameField.value &&
       this.mandatoryIntField.value == that.mandatoryIntField.value &&
+      this.altNameIntField.value == that.altNameIntField.value &&
       this.mandatoryLocaleField.value == that.mandatoryLocaleField.value &&
       this.mandatoryLongField.value == that.mandatoryLongField.value &&
+      this.altNameLongField.value == that.altNameLongField.value &&
       this.mandatoryPostalCodeField.value == that.mandatoryPostalCodeField.value &&
       this.mandatoryStringField.value == that.mandatoryStringField.value &&
+      this.altNameStringField.value == that.altNameStringField.value &&
       this.mandatoryTextareaField.value == that.mandatoryTextareaField.value &&
       this.mandatoryTimeZoneField.value == that.mandatoryTimeZoneField.value
     case _ => false
@@ -173,6 +211,9 @@ class MongoFieldTypeTestRecord private () extends MongoRecord[MongoFieldTypeTest
 
   object mandatoryDateField extends DateField(this)
   object legacyOptionalDateField extends DateField(this) { override def optional_? = true }
+  object altNameDateField extends DateField(this) with MongoField {
+    override def mongoName = Full("alt_date_field")
+  }
 
   object mandatoryDBRefField extends DBRefField[MongoFieldTypeTestRecord, DBRefTestRecord](this, DBRefTestRecord)
   object legacyOptionalDBRefField extends DBRefField[MongoFieldTypeTestRecord, DBRefTestRecord](this, DBRefTestRecord) { override def optional_? = true }
@@ -184,26 +225,45 @@ class MongoFieldTypeTestRecord private () extends MongoRecord[MongoFieldTypeTest
     override def optional_? = true
     def defaultValue = TypeTestJsonObject(0, "")
   }
+  object altNameJsonObjectField extends JsonObjectField(this, TypeTestJsonObject) with MongoField {
+    def defaultValue = TypeTestJsonObject(3, "alt name")
+    override def mongoName = Full("alt_jsonobject_field")
+  }
 
   object mandatoryObjectIdField extends ObjectIdField(this)
   object legacyOptionalObjectIdField extends ObjectIdField(this) { override def optional_? = true }
+  object altNameObjectIdField extends ObjectIdField(this) with MongoField {
+    override def mongoName = Full("alt_objectid_field")
+  }
 
   object mandatoryPatternField extends PatternField(this)
   object legacyOptionalPatternField extends PatternField(this) { override def optional_? = true }
+  object altNamePatternField extends PatternField(this) with MongoField {
+    override def mongoName = Full("alt_pattern_field")
+  }
 
   object mandatoryUUIDField extends UUIDField(this)
   object legacyOptionalUUIDField extends UUIDField(this) { override def optional_? = true }
+  object altNameUUIDField extends UUIDField(this) with MongoField {
+    override def mongoName = Full("alt_UUID_field")
+  }
 
   override def equals(other: Any): Boolean = other match {
     case that:MongoFieldTypeTestRecord =>
       this.mandatoryDateField.value == that.mandatoryDateField.value &&
+      this.altNameDateField.value == that.altNameDateField.value &&
       //this.mandatoryDBRefField.value.getId == that.mandatoryDBRefField.value.getId &&
       //this.mandatoryDBRefField.value.getRef == that.mandatoryDBRefField.value.getRef &&
       this.mandatoryJsonObjectField.value == that.mandatoryJsonObjectField.value &&
+      this.altNameJsonObjectField.value == that.altNameJsonObjectField.value &&
       this.mandatoryObjectIdField.value == that.mandatoryObjectIdField.value &&
+      this.altNameObjectIdField.value == that.altNameObjectIdField.value &&
       this.mandatoryPatternField.value.pattern == that.mandatoryPatternField.value.pattern &&
       this.mandatoryPatternField.value.flags == that.mandatoryPatternField.value.flags &&
-      this.mandatoryUUIDField.value == that.mandatoryUUIDField.value
+      this.altNamePatternField.value.pattern == that.altNamePatternField.value.pattern &&
+      this.altNamePatternField.value.flags == that.altNamePatternField.value.flags &&
+      this.mandatoryUUIDField.value == that.mandatoryUUIDField.value &&
+      this.altNameUUIDField.value == that.altNameUUIDField.value
     case _ => false
   }
 }
@@ -326,7 +386,3 @@ object BoxTestRecord extends BoxTestRecord with MongoMetaRecord[BoxTestRecord] {
   override def formats = super.formats + new JsonBoxSerializer
 }
 
-}
-}
-}
-}

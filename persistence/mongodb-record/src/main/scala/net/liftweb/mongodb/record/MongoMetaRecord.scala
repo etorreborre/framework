@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 WorldWide Conferencing, LLC
+ * Copyright 2010-2011 WorldWide Conferencing, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package net.liftweb {
-package mongodb {
-package record {
+package net.liftweb
+package mongodb
+package record
 
 import java.util.{Calendar, UUID}
 import java.util.regex.Pattern
 
 import scala.collection.JavaConversions._
 
-import net.liftweb.common.{Box, Empty, Full}
-import net.liftweb.json.{Formats, JsonParser}
-import net.liftweb.json.JsonAST._
-import net.liftweb.mongodb._
-import net.liftweb.mongodb.record.field._
-import net.liftweb.record.{MetaRecord, Record}
+import common.{Box, Empty, Full}
+import json.{Formats, JsonParser}
+import json.JsonAST._
+import record.field._
+import net.liftweb.record.{Field, MetaRecord, Record}
 import net.liftweb.record.FieldHelpers.expectedA
 import net.liftweb.record.field._
 
@@ -223,7 +222,7 @@ trait MongoMetaRecord[BaseRecord <: MongoRecord[BaseRecord]]
   * Save the instance in the appropriate backing store
   */
   def save(inst: BaseRecord, concern: WriteConcern): Boolean = saveOp(inst) {
-    useColl { coll => 
+    useColl { coll =>
       coll.save(inst.asDBObject, concern)
     }
   }
@@ -316,20 +315,20 @@ trait MongoMetaRecord[BaseRecord <: MongoRecord[BaseRecord]]
         case field if (field.optional_? && field.valueBox.isEmpty) => // don't add to DBObject
         case field: EnumTypedField[Enumeration] =>
           field.asInstanceOf[EnumTypedField[Enumeration]].valueBox foreach {
-            v => dbo.add(f.name, v.id)
+            v => dbo.add(mongoName(f), v.id)
           }
         case field: EnumNameTypedField[Enumeration] =>
           field.asInstanceOf[EnumNameTypedField[Enumeration]].valueBox foreach {
-            v => dbo.add(f.name, v.toString)
+            v => dbo.add(mongoName(f), v.toString)
           }
         case field: MongoFieldFlavor[Any] =>
-          dbo.add(f.name, field.asInstanceOf[MongoFieldFlavor[Any]].asDBObject)
+          dbo.add(mongoName(f), field.asInstanceOf[MongoFieldFlavor[Any]].asDBObject)
         case field => field.valueBox foreach (_.asInstanceOf[AnyRef] match {
-          case null => dbo.add(f.name, null)
-          case x if primitive_?(x.getClass) => dbo.add(f.name, x)
-          case x if mongotype_?(x.getClass) => dbo.add(f.name, x)
-          case x if datetype_?(x.getClass) => dbo.add(f.name, datetype2dbovalue(x))
-          case o => dbo.add(f.name, o.toString)
+          case null => dbo.add(mongoName(f), null)
+          case x if primitive_?(x.getClass) => dbo.add(mongoName(f), x)
+          case x if mongotype_?(x.getClass) => dbo.add(mongoName(f), x)
+          case x if datetype_?(x.getClass) => dbo.add(mongoName(f), datetype2dbovalue(x))
+          case o => dbo.add(mongoName(f), o.toString)
         })
       }
     }
@@ -357,15 +356,25 @@ trait MongoMetaRecord[BaseRecord <: MongoRecord[BaseRecord]]
   * @return Box[BaseRecord]
   */
   def setFieldsFromDBObject(inst: BaseRecord, dbo: DBObject): Unit = {
-    for (k <- dbo.keySet; field <- inst.fieldByName(k.toString)) {
-      field.setFromAny(dbo.get(k.toString))
-    }
+    for {
+      field <- inst.fields
+      fieldName = mongoName(field)
+      if (dbo.containsField(fieldName))
+    } field.setFromAny(dbo.get(fieldName))
+
     inst.runSafe {
       inst.fields.foreach(_.resetDirty)
     }
   }
-}
 
-}
-}
+  /*
+   * Return the name of the field in the encoded DBbject. If the field
+   * implements MongoField and has overridden mongoName then
+   * that will be used, otherwise the record field name.
+   */
+  def mongoName(field: Field[_, BaseRecord]): String = field match {
+    case (mongoField: MongoField) => mongoField.mongoName openOr field.name
+    case _ => field.name
+  }
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 WorldWide Conferencing, LLC
+ * Copyright 2010-2011 WorldWide Conferencing, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package net.liftweb {
-package mongodb {
-package record {
+package net.liftweb
+package mongodb
+package record
 
 import common._
 import http.js.JE._
@@ -40,17 +40,19 @@ object MongoRecordSpecs extends Specification with MongoTestKit {
 
   import fixtures._
 
+  override def debug = true
+
   "MongoRecord field introspection" should {
     checkMongoIsRunning
 
     val rec = MongoFieldTypeTestRecord.createRecord
     val allExpectedFieldNames: List[String] = "_id" :: (for {
       typeName <- "Date DBRef JsonObject ObjectId Pattern UUID".split(" ")
-      flavor <- "mandatory legacyOptional".split(" ")
-    } yield flavor + typeName + "Field").toList
+      flavor <- "mandatory legacyOptional altName".split(" ")
+    } yield flavor + typeName + "Field").toList.filterNot(_ == "altNameDBRefField")
 
     "introspect only the expected fields" in {
-      rec.fields().map(_.name).sort(_ < _) must_== allExpectedFieldNames.sort(_ < _)
+      allExpectedFieldNames filterNot (rec.fields().map(_.name) contains) must_== Nil
     }
 
     "correctly look up fields by name" in {
@@ -169,20 +171,29 @@ object MongoRecordSpecs extends Specification with MongoTestKit {
 
   "MongoRecord" should {
     checkMongoIsRunning
-    
+
     val fttr = FieldTypeTestRecord.createRecord
       //.mandatoryBinaryField()
       .mandatoryBooleanField(false)
+      .altNameBooleanField(true)
       .mandatoryCountryField(Countries.USA)
       .mandatoryDecimalField(BigDecimal("3.14"))
+      .altNameDecimalField(BigDecimal("45.89"))
       .mandatoryDoubleField(1999)
+      .altNameDoubleField(10000)
       .mandatoryEmailField("test@liftweb.net")
       .mandatoryEnumField(MyTestEnum.ONE)
+      .altNameEnumField(MyTestEnum.THREE)
+      .mandatoryEnumNameField(MyTestEnum.TWO)
+      .altNameEnumNameField(MyTestEnum.ONE)
       .mandatoryIntField(99)
+      .altNameIntField(110)
       .mandatoryLocaleField("en_US")
       .mandatoryLongField(100L)
+      .altNameLongField(1000L)
       .mandatoryPostalCodeField("55401")
       .mandatoryStringField("string")
+      .altNameStringField("alt string")
       .mandatoryTextareaField("string")
       .mandatoryTimeZoneField("America/Chicago")
 
@@ -192,7 +203,7 @@ object MongoRecordSpecs extends Specification with MongoTestKit {
       .mandatoryObjectIdField(ObjectId.get)
       .mandatoryPatternField(Pattern.compile("^Mo", Pattern.CASE_INSENSITIVE))
       .mandatoryUUIDField(UUID.randomUUID)
-    
+
     /* This causes problems if MongoDB is not running */
     if (isMongoRunning) {
       mfttr.mandatoryDBRefField(DBRefTestRecord.createRecord.getRef)
@@ -207,9 +218,9 @@ object MongoRecordSpecs extends Specification with MongoTestKit {
       .mandatoryStringMapField(Map("a" -> "abc", "b" -> "def", "c" -> "ghi"))
       .mandatoryIntMapField(Map("a" -> 4, "b" -> 5, "c" -> 6))
 
-    val json = "{\"mandatoryDateField\":{\"$dt\":\""+mfttr.meta.formats.dateFormat.format(mfttr.mandatoryDateField.value)+"\"},\"mandatoryJsonObjectField\":{\"intField\":1,\"stringField\":\"jsonobj1\"},\"mandatoryObjectIdField\":{\"$oid\":\""+mfttr.mandatoryObjectIdField.value.toString+"\"},\"mandatoryPatternField\":{\"$regex\":\"^Mo\",\"$flags\":2},\"mandatoryUUIDField\":{\"$uuid\":\""+mfttr.mandatoryUUIDField.value.toString+"\"},\"_id\":{\"$oid\":\""+mfttr.id.toString+"\"}}"
-    val ljson = "{\"mandatoryStringListField\":[\"abc\",\"def\",\"ghi\"],\"legacyOptionalStringListField\":[],\"mandatoryIntListField\":[4,5,6],\"legacyOptionalIntListField\":[],\"mandatoryMongoJsonObjectListField\":[{\"intField\":1,\"stringField\":\"jsonobj1\"},{\"intField\":2,\"stringField\":\"jsonobj2\"}],\"legacyOptionalMongoJsonObjectListField\":[],\"_id\":{\"$oid\":\""+ltr.id.toString+"\"}}"
-    val mjson = "{\"mandatoryStringMapField\":{\"a\":\"abc\",\"b\":\"def\",\"c\":\"ghi\"},\"legacyOptionalStringMapField\":{},\"mandatoryIntMapField\":{\"a\":4,\"b\":5,\"c\":6},\"legacyOptionalIntMapField\":{},\"_id\":{\"$oid\":\""+mtr.id.toString+"\"}}"
+    val json = Printer.compact(render(mfttr.asJValue))
+    val ljson = Printer.compact(render(ltr.asJValue))
+    val mjson = Printer.compact(render(mtr.asJValue))
 
     "save and retrieve 'standard' type fields" in {
       checkMongoIsRunning
@@ -260,16 +271,21 @@ object MongoRecordSpecs extends Specification with MongoTestKit {
         JField("_id", JObject(List(JField("$oid", JString(mfttr.id.toString))))),
         JField("mandatoryDateField", JObject(List(JField("$dt", JString(mfttr.meta.formats.dateFormat.format(mfttr.mandatoryDateField.value)))))),
         JField("legacyOptionalDateField", JNothing),
+        JField("altNameDateField", JObject(List(JField("$dt", JString(mfttr.meta.formats.dateFormat.format(mfttr.altNameDateField.value)))))),
         JField("mandatoryDBRefField", JNothing),
         JField("legacyOptionalDBRefField", JNothing),
         JField("mandatoryJsonObjectField", JObject(List(JField("intField", JInt(1)), JField("stringField", JString("jsonobj1"))))),
         JField("legacyOptionalJsonObjectField", JObject(List(JField("intField", JInt(0)), JField("stringField", JString(""))))),
+        JField("altNameJsonObjectField", JObject(List(JField("intField", JInt(3)), JField("stringField", JString("alt name"))))),
         JField("mandatoryObjectIdField", JObject(List(JField("$oid", JString(mfttr.mandatoryObjectIdField.value.toString))))),
         JField("legacyOptionalObjectIdField", JNothing),
+        JField("altNameObjectIdField", JObject(List(JField("$oid", JString(mfttr.altNameObjectIdField.value.toString))))),
         JField("mandatoryPatternField", JObject(List(JField("$regex", JString(mfttr.mandatoryPatternField.value.pattern)), JField("$flags", JInt(mfttr.mandatoryPatternField.value.flags))))),
         JField("legacyOptionalPatternField", JNothing),
+        JField("altNamePatternField", JObject(List(JField("$regex", JString(mfttr.altNamePatternField.value.pattern)), JField("$flags", JInt(mfttr.altNamePatternField.value.flags))))),
         JField("mandatoryUUIDField", JObject(List(JField("$uuid", JString(mfttr.mandatoryUUIDField.value.toString))))),
-        JField("legacyOptionalUUIDField", JNothing)
+        JField("legacyOptionalUUIDField", JNothing),
+        JField("altNameUUIDField", JObject(List(JField("$uuid", JString(mfttr.altNameUUIDField.value.toString)))))
       ))
 
       ltr.asJValue mustEqual JObject(List(
@@ -302,7 +318,7 @@ object MongoRecordSpecs extends Specification with MongoTestKit {
         JField("legacyOptionalIntMapField", JObject(List()))
       ))
     }
-    
+
     "convert Mongo type fields to JsExp" in {
       checkMongoIsRunning
 
@@ -411,7 +427,7 @@ object MongoRecordSpecs extends Specification with MongoTestKit {
 
     "handle Box using JsonBoxSerializer" in {
       checkMongoIsRunning
-      
+
       val btr = BoxTestRecord.createRecord
       btr.jsonobjlist.set(
         BoxTestJsonObj("1", Empty, Full("Full String1"), Failure("Failure1")) ::
@@ -436,8 +452,4 @@ object MongoRecordSpecs extends Specification with MongoTestKit {
     }
 
   }
-}
-
-}
-}
 }
