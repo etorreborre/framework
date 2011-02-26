@@ -166,7 +166,12 @@ object MongoRecordSpec extends Specification("MongoRecord Specification") with M
 
   "MongoRecord" should {
     checkMongoIsRunning
-    
+
+    val sr1 = SubRecord.createRecord
+      .name("SubRecord1")
+    val sr2 = SubRecord.createRecord
+      .name("SubRecord2")
+
     val fttr = FieldTypeTestRecord.createRecord
       //.mandatoryBinaryField()
       .mandatoryBooleanField(false)
@@ -204,10 +209,25 @@ object MongoRecordSpec extends Specification("MongoRecord Specification") with M
     val mtr = MapTestRecord.createRecord
       .mandatoryStringMapField(Map("a" -> "abc", "b" -> "def", "c" -> "ghi"))
       .mandatoryIntMapField(Map("a" -> 4, "b" -> 5, "c" -> 6))
+      
+    val srtr = SubRecordTestRecord.createRecord
+      .mandatoryMongoSubRecordField(sr1)
+      .mandatoryMongoSubRecordListField(List(sr1,sr2))
 
-    val json = "{\"mandatoryDateField\":{\"$dt\":\""+mfttr.meta.formats.dateFormat.format(mfttr.mandatoryDateField.value)+"\"},\"mandatoryJsonObjectField\":{\"intField\":1,\"stringField\":\"jsonobj1\"},\"mandatoryObjectIdField\":{\"$oid\":\""+mfttr.mandatoryObjectIdField.value.toString+"\"},\"mandatoryPatternField\":{\"$regex\":\"^Mo\",\"$flags\":2},\"mandatoryUUIDField\":{\"$uuid\":\""+mfttr.mandatoryUUIDField.value.toString+"\"},\"_id\":{\"$oid\":\""+mfttr.id.toString+"\"}}"
-    val ljson = "{\"mandatoryStringListField\":[\"abc\",\"def\",\"ghi\"],\"legacyOptionalStringListField\":[],\"mandatoryIntListField\":[4,5,6],\"legacyOptionalIntListField\":[],\"mandatoryMongoJsonObjectListField\":[{\"intField\":1,\"stringField\":\"jsonobj1\"},{\"intField\":2,\"stringField\":\"jsonobj2\"}],\"legacyOptionalMongoJsonObjectListField\":[],\"_id\":{\"$oid\":\""+ltr.id.toString+"\"}}"
-    val mjson = "{\"mandatoryStringMapField\":{\"a\":\"abc\",\"b\":\"def\",\"c\":\"ghi\"},\"legacyOptionalStringMapField\":{},\"mandatoryIntMapField\":{\"a\":4,\"b\":5,\"c\":6},\"legacyOptionalIntMapField\":{},\"_id\":{\"$oid\":\""+mtr.id.toString+"\"}}"
+    val json = Printer.compact(render(mfttr.asJValue))
+    val ljson = Printer.compact(render(ltr.asJValue))
+    val mjson = Printer.compact(render(mtr.asJValue))
+    
+    val srtrJson = JObject(List(
+      JField("_id", JObject(List(JField("$oid", JString(srtr.id.toString))))),
+      JField("mandatoryMongoSubRecordField", JObject(List(JField("name", JString("SubRecord1"))))),
+      JField("legacyOptionalMongoSubRecordField", JNothing),
+      JField("mandatoryMongoSubRecordListField", JArray(List(
+        JObject(List(JField("name", JString("SubRecord1")))),
+        JObject(List(JField("name", JString("SubRecord2"))))
+      ))),
+      JField("legacyOptionalMongoSubRecordListField", JNothing)
+    ))
 
     "save and retrieve 'standard' type fields" in {
       checkMongoIsRunning
@@ -248,6 +268,14 @@ object MongoRecordSpec extends Specification("MongoRecord Specification") with M
       mtrFromDb must notBeEmpty
       mtrFromDb foreach { tr =>
         tr mustEqual mtr
+      }
+      
+      srtr.save
+
+      val srtrFromDb = SubRecordTestRecord.find(srtr.id)
+      srtrFromDb must notBeEmpty
+      srtrFromDb foreach { tr =>
+        tr mustEqual srtr
       }
     }
 
@@ -302,6 +330,13 @@ object MongoRecordSpec extends Specification("MongoRecord Specification") with M
         ))),
         JField("legacyOptionalIntMapField", JObject(List()))
       ))
+      
+      val srtrAsJValue = srtr.asJValue
+      srtrAsJValue \\ "_id" mustEqual srtrJson \\ "_id"
+      srtrAsJValue \\ "mandatoryMongoSubRecordField" mustEqual srtrJson \\ "mandatoryMongoSubRecordField"
+      srtrAsJValue \\ "legacyOptionalMongoSubRecordField" mustEqual srtrJson \\ "legacyOptionalMongoSubRecordField"
+      srtrAsJValue \\ "mandatoryMongoSubRecordListField" mustEqual srtrJson \\ "mandatoryMongoSubRecordListField"
+      srtrAsJValue \\ "legacyOptionalMongoSubRecordListField" mustEqual srtrJson \\ "legacyOptionalMongoSubRecordListField"
     }
     
     "convert Mongo type fields to JsExp" in {
