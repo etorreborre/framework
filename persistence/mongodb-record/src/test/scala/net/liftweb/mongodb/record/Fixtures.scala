@@ -347,6 +347,45 @@ object LifecycleTestRecord extends LifecycleTestRecord with MongoMetaRecord[Life
   override def foreachCallback(inst: LifecycleTestRecord, f: LifecycleCallbacks => Any) = super.foreachCallback(inst, f)
 }
 
+/*
+ * SubRecord fields
+ */
+class SubRecord extends BsonRecord[SubRecord] {
+  def meta = SubRecord
+
+  object name extends StringField(this, 12)
+
+  override def equals(other: Any): Boolean = other match {
+    case that:SubRecord =>
+      this.name.value == that.name.value
+    case _ => false
+  }
+}
+object SubRecord extends SubRecord with BsonMetaRecord[SubRecord] {
+  override def formats = allFormats
+}
+
+class SubRecordTestRecord extends MongoRecord[SubRecordTestRecord] with MongoId[SubRecordTestRecord] {
+  def meta = SubRecordTestRecord
+
+  object mandatoryMongoSubRecordField extends MongoSubRecordField(this, SubRecord)
+  object legacyOptionalMongoSubRecordField extends MongoSubRecordField(this, SubRecord) {
+    override def optional_? = true
+  }
+
+  override def equals(other: Any): Boolean = other match {
+    case that:SubRecordTestRecord =>
+      this.id == that.id &&
+      this.mandatoryMongoSubRecordField.value == that.mandatoryMongoSubRecordField.value &&
+      this.legacyOptionalMongoSubRecordField.valueBox == that.legacyOptionalMongoSubRecordField.valueBox
+    case _ => false
+  }
+
+}
+object SubRecordTestRecord extends SubRecordTestRecord with MongoMetaRecord[SubRecordTestRecord] {
+  override def formats = allFormats
+}
+
 case class JsonObj(id: String, name: String) extends JsonObject[JsonObj] {
   def meta = JsonObj
 }
