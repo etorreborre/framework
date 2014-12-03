@@ -24,7 +24,7 @@ import java.util.regex.Pattern
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
 import org.specs2.mutable.Specification
-import org.specs2.specification.Fragment
+import org.specs2.specification.core.Fragment
 
 import common._
 import http.{S, LiftSession}

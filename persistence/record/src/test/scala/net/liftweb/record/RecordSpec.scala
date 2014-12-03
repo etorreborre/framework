@@ -20,7 +20,7 @@ package record
 import java.util.Calendar
 
 import org.specs2.mutable.Specification
-import org.specs2.specification.Fragment
+import org.specs2.specification.core.Fragment
 import org.joda.time._
 
 import http.js.JE._
@@ -278,7 +278,7 @@ object RecordSpec extends Specification {
         fttr.asJsExp mustEqual fttrAsJsObj
       }*/
 
-      "convert to JValue" in {
+      "convert to JValue" >> {
         fttr.asJValue mustEqual JObject(List(
           JField("mandatoryBooleanField", JBool(false)),
           JField("legacyOptionalBooleanField", JNothing),

@@ -27,14 +27,12 @@ import org.specs2.mutable.Specification
 /**
  * System under specification for MongoDirectMonoClient.
  */
-class MongoDirectMongoClientSpec extends Specification with MongoTestKit {
+class MongoDirectMongoClientSpec extends Specification with MongoTestKit { skipAllUnless(isMongoRunning)
   "MongoDirectMonoClient Specification".title
 
   override def mongo = new MongoClient("127.0.0.1", 27017)
 
   "MongoClient example" in {
-
-    checkMongoIsRunning
 
     // use a Mongo instance directly
     MongoDB.use( db => {

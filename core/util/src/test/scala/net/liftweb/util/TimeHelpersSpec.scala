@@ -21,19 +21,16 @@ import java.util.{Calendar, Date}
 
 import org.specs2.mutable.Specification
 import org.specs2.ScalaCheck
-import org.specs2.time.NoTimeConversions
 import org.scalacheck.Gen._
 import org.scalacheck.Prop._
 
 import common._
 import TimeHelpers._
 
-
-
 /**
  * Systems under specification for TimeHelpers.
  */
-object TimeHelpersSpec extends Specification with ScalaCheck with TimeAmountsGen with NoTimeConversions {
+object TimeHelpersSpec extends Specification with ScalaCheck with TimeAmountsGen {
   "TimeHelpers Specification".title
 
   "A TimeSpan" can {

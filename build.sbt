@@ -16,7 +16,7 @@ scalaVersion in ThisBuild          := "2.11.2"
 
 crossScalaVersions in ThisBuild    := Seq("2.11.2")
 
-libraryDependencies in ThisBuild <++= scalaVersion {sv => Seq(specs2, scalacheck, scalatest) }
+libraryDependencies in ThisBuild <++= scalaVersion {sv => specs2 ++ Seq(scalacheck, scalatest) }
 
 // Settings for Sonatype compliance
 pomIncludeRepository in ThisBuild  := { _ => false }

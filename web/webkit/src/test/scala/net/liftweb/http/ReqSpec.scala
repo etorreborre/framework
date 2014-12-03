@@ -143,7 +143,7 @@ object ReqSpec extends Specification with XmlMatchers with Mockito {
       }
     }
 
-    "when trying to JSON parse the request body" in {
+    "when trying to JSON parse the request body" >> {
       "with an invalid Content-Type should return a Failure" in new mockJsonReq {
         req("text/plain").json should beAnInstanceOf[Failure]
       }
@@ -161,7 +161,7 @@ object ReqSpec extends Specification with XmlMatchers with Mockito {
       }
     }
 
-    "when forcing a request body JSON parse with forcedBodyAsJson" in {
+    "when forcing a request body JSON parse with forcedBodyAsJson" >> {
       "with an invalid Content-Type should return the result of parsing the JSON" in new mockJsonReq {
         req("text/plain").forcedBodyAsJson should_== Full(parsedJson)
       }
@@ -179,7 +179,7 @@ object ReqSpec extends Specification with XmlMatchers with Mockito {
       }
     }
 
-    "when trying to XML parse the request body" in {
+    "when trying to XML parse the request body" >> {
       "with an invalid Content-Type should return a Failure" in new mockXmlReq {
         req("text/plain").xml should beAnInstanceOf[Failure]
       }
@@ -197,7 +197,7 @@ object ReqSpec extends Specification with XmlMatchers with Mockito {
       }
     }
 
-    "when forcing a request body XML parse with forcedBodyAsXml" in {
+    "when forcing a request body XML parse with forcedBodyAsXml" >> {
       "with an invalid Content-Type should return the result of parsing the JSON" in new mockXmlReq {
         req("text/plain").forcedBodyAsXml should_== Full(parsedXml)
       }

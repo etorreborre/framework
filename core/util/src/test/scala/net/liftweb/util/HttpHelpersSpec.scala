@@ -37,7 +37,7 @@ object HttpHelpersSpec extends Specification with HttpHelpers with ListHelpers w
     "a paramsToUrlParams function to translate a map of parameters to a URL query" in {
       paramsToUrlParams(List(("firstname", "hello"), ("lastname", "world"))) must_== "firstname=hello&lastname=world"
     }
-    "an appendParams function to add parameters to a URL query" in {
+    "an appendParams function to add parameters to a URL query" >> {
       "creating the param list with ? if there are no existing params" in {
         appendParams("www.helloworld.com/params", List(("firstname", "hello"), ("lastname", "world"))) must_==
         "www.helloworld.com/params?firstname=hello&lastname=world"
@@ -50,7 +50,7 @@ object HttpHelpersSpec extends Specification with HttpHelpers with ListHelpers w
         appendParams("www.helloworld.com/params", Nil) must_== "www.helloworld.com/params"
       }
     }
-    "a couldBeHtml function" in {
+    "a couldBeHtml function" >> {
       "returning true if there is a pair (Content-Type, text/html)" in {
         couldBeHtml(Map(("Content-Type", "text/html"))) must beTrue
       }
@@ -64,7 +64,7 @@ object HttpHelpersSpec extends Specification with HttpHelpers with ListHelpers w
         couldBeHtml(Map(("no content type", "text/html"))) must beTrue
       }
     }
-    "a noHtmlTag" in {
+    "a noHtmlTag" >> {
       "returning true if a xml node doesn't contain the html tag" in {
         noHtmlTag(<a><b></b></a>) must beTrue
       }
@@ -75,7 +75,7 @@ object HttpHelpersSpec extends Specification with HttpHelpers with ListHelpers w
     "a toHashMap function transforming a Map to a mutable HashMap" in {
       toHashMap(Map(1 -> 2, 3 -> 4)) must haveClass[scala.collection.mutable.HashMap[Int, Int]]
     }
-    "an insureField function" in {
+    "an insureField function" >> {
       "checking that the appropriate fields are in the header" in {
         insureField(List(("name", "hello")), List(("name", "hello"))) must_== List(("name", "hello"))
       }
@@ -86,7 +86,7 @@ object HttpHelpersSpec extends Specification with HttpHelpers with ListHelpers w
     "an implicit definition to transform a pair to an UnprefixedAttribute" in {
       pairToUnprefixed(("value", 1)).apply("value").toString must_== "1"
     }
-    "a findOrAddId function" in {
+    "a findOrAddId function" >> {
       "returning an element and its id if found" in { findOrAddId(<a id="1"></a>) must_== (<a id="1"></a>, "1") }
       "returning an element with a random id if not found" in {
         val (e, id) = findOrAddId(<a></a>)

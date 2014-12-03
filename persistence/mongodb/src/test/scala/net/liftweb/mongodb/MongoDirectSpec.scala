@@ -32,14 +32,12 @@ import json.DefaultFormats
 /**
  * System under specification for MongoDirect.
  */
-class MongoDirectSpec extends Specification with MongoTestKit {
+class MongoDirectSpec extends Specification with MongoTestKit { skipAllUnless(isMongoRunning)
   "MongoDirect Specification".title
 
   def date(s: String) = DefaultFormats.dateFormat.parse(s).get
 
   "Mongo tutorial example" in {
-
-    checkMongoIsRunning
 
     // build the DBObject
     val doc = new BasicDBObject
@@ -102,8 +100,6 @@ class MongoDirectSpec extends Specification with MongoTestKit {
   }
 
   "Mongo tutorial 2 example" in {
-
-    checkMongoIsRunning
 
     // use a DBCollection directly
     MongoDB.useCollection("iDoc") ( coll => {
@@ -201,8 +197,6 @@ class MongoDirectSpec extends Specification with MongoTestKit {
 
   "Mongo useSession example" in {
 
-    checkMongoIsRunning
-
     // use a Mongo instance directly with a session
     MongoDB.useSession ( db => {
       val coll = db.getCollection("testCollection")
@@ -279,8 +273,6 @@ class MongoDirectSpec extends Specification with MongoTestKit {
   }
 
   "UUID Example" in {
-
-    checkMongoIsRunning
 
     MongoDB.useCollection("examples.uuid") { coll =>
       val uuid = UUID.randomUUID

@@ -376,12 +376,12 @@ trait BoxGenerator {
 
   implicit def genThrowable: Arbitrary[Throwable] = Arbitrary[Throwable] {
     case object UserException extends Throwable
-    value(UserException)
+    const(UserException)
   }
 
   implicit def genBox[T](implicit a: Arbitrary[T]): Arbitrary[Box[T]] = Arbitrary[Box[T]] {
     frequency(
-      (3, value(Empty)),
+      (3, const(Empty)),
       (3, a.arbitrary.map(Full[T])),
       (1, genFailureBox)
     )
@@ -390,9 +390,9 @@ trait BoxGenerator {
   def genFailureBox: Gen[Failure] = for {
     msgLen <- choose(0, 4)
     msg <- listOfN(msgLen, alphaChar)
-    exception <- value(Full(new Exception("")))
+    exception <- const(Full(new Exception("")))
     chainLen <- choose(1, 5)
-    chain <- frequency((1, listOfN(chainLen, genFailureBox)), (3, value(Nil)))
+    chain <- frequency((1, listOfN(chainLen, genFailureBox)), (3, const(Nil)))
   } yield Failure(msg.mkString, exception, Box(chain.headOption))
 
 }

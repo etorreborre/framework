@@ -28,7 +28,7 @@ object SerializationBugs extends Specification {
   "plan1.Plan can be serialized (issue 341)" in {
     import plan1._
 
-    val game = Game(Map("a" -> Plan(Some(Action(1, None))))) 
+    val game = Game(Map("a" -> Plan(Some(plan1.Action(1, None))))) 
     val ser = swrite(game)
     read[Game](ser) mustEqual game
   }
@@ -36,9 +36,9 @@ object SerializationBugs extends Specification {
   "plan2.Plan can be serialized (issue 341)" in {
     import plan2._
 
-    val g1 = Game(Map("a" -> Plan(Some(Action("f1", "s", Array(), None)), 
+    val g1 = Game(Map("a" -> Plan(Some(plan2.Action("f1", "s", Array(), None)), 
                                   Some("A"), 
-                                  Some(Action("f2", "s2", Array(0, 1, 2), None)))))
+                                  Some(plan2.Action("f2", "s2", Array(0, 1, 2), None)))))
     val ser = swrite(g1)
     val g2 = read[Game](ser)
     val plan = g2.buy("a")

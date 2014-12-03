@@ -96,17 +96,16 @@ object BuildDef extends Build {
     webProject("testkit")
         .dependsOn(util)
         .settings(description := "Testkit for Webkit Library",
-                  libraryDependencies ++= Seq(commons_httpclient, servlet_api))
+                  libraryDependencies ++= Seq(commons_httpclient, servlet_api) ++ specs2)
   lazy val webkit =
     webProject("webkit")
         .dependsOn(util, testkit % "provided")
-        .settings(libraryDependencies += mockito_all)
+        .settings(libraryDependencies ++= Seq(mockito_all) ++ specs2)
         .settings(yuiCompressor.Plugin.yuiSettings: _*)
         .settings(description := "Webkit Library",
                   parallelExecution in Test := false,
                   libraryDependencies <++= scalaVersion { sv =>
-                    Seq(commons_fileupload, rhino, servlet_api, specs2.copy(configurations = Some("provided")), jetty6,
-                      jwebunit)
+                    Seq(commons_fileupload, rhino, servlet_api, jetty6, jwebunit) ++ specs2
                   },
                   initialize in Test <<= (sourceDirectory in Test) { src =>
                     System.setProperty("net.liftweb.webapptest.src.test.webapp", (src / "webapp").absString)

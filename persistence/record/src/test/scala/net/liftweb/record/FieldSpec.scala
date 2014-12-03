@@ -28,7 +28,7 @@ import util.Helpers._
 
 import java.util.Calendar
 import org.specs2.mutable._
-import org.specs2.specification.Fragment
+import org.specs2.specification.core._
 import org.joda.time.DateTime
 
 import fixtures._
@@ -155,7 +155,7 @@ object FieldSpec extends Specification {
       }
     }
 
-    "support mandatory fields" in {
+    "support mandatory fields" >> {
       commonBehaviorsForAllFlavors(mandatory)
       commonBehaviorsForMandatory(mandatory)
 
@@ -175,7 +175,7 @@ object FieldSpec extends Specification {
       }
     }
 
-    "support 'legacy' optional fields (override optional_?)" in {
+    "support 'legacy' optional fields (override optional_?)" >> {
       commonBehaviorsForAllFlavors(legacyOptional)
       commonBehaviorsForMandatory(legacyOptional)
 
@@ -208,7 +208,7 @@ object FieldSpec extends Specification {
       }
     }
 
-    "support optional fields" in {
+    "support optional fields" >> {
       commonBehaviorsForAllFlavors(optional)
 
       "which are configured correctly" in {
@@ -243,10 +243,9 @@ object FieldSpec extends Specification {
         optional.valueBox must_== Empty
       }
     }
-    success
   }
 
-  def passConversionTests[A](example: A, mandatory: MandatoryTypedField[A], jsexp: JsExp, jvalue: JValue, formPattern: Box[NodeSeq]): Fragment = {
+  def passConversionTests[A](example: A, mandatory: MandatoryTypedField[A], jsexp: JsExp, jvalue: JValue, formPattern: Box[NodeSeq]) = {
 
     "convert to JsExp" in S.initIfUninitted(session) {
       mandatory.set(example)
@@ -284,7 +283,7 @@ object FieldSpec extends Specification {
         }
       }
     }
-    success
+    p
   }
 
     /* Since Array[Byte]s cannot be compared, commenting out this test for now
@@ -617,7 +616,7 @@ object FieldSpec extends Specification {
       )
     }
 
-    "honor harnessed validators" in {
+    "honor harnessed validators" >> {
       val rec = ValidationTestRecord.createRecord
       val field = rec.stringFieldWithValidation
 
@@ -641,7 +640,7 @@ object FieldSpec extends Specification {
       }
     }
 
-    "support filtering" in {
+    "support filtering" >> {
       val rec = FilterTestRecord.createRecord
       val field = rec.stringFieldWithFiltering
 

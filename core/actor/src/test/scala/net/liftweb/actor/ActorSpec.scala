@@ -18,9 +18,8 @@ package net.liftweb
 package actor
 
 import org.specs2.mutable.Specification
-import org.specs2.time.TimeConversions._
-
 import common._
+import scala.concurrent.duration._
 
 
 /**
@@ -31,15 +30,14 @@ class ActorSpec extends Specification {
   sequential
 
   "A Scala Actor" should {
-    "support common features" in commonFeatures(new MyScalaActor)
+    "support common features" >> commonFeatures(new MyScalaActor)
   }
 
   "A Java Actor" should {
-    "support common features" in commonFeatures(new MyJavaActor)
+    "support common features" >> commonFeatures(new MyJavaActor)
   }
 
   private def commonFeatures(actor: LiftActor) = {
-    sequential
 
     "allow setting and getting of a value" in {
       val a = actor
